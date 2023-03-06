@@ -1,8 +1,10 @@
 package pi.app.estatemarket.Services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.twilio.Twilio;
@@ -17,7 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-//@Slf4j
+@Slf4j
 @AllArgsConstructor
 public class AppointmentService implements IAppointmentService {
 
@@ -41,22 +43,23 @@ public class AppointmentService implements IAppointmentService {
         }
 
         // Vérifier si la date de rendez-vous est dans le futur
-        if (appointment.getDate().before(new Date())) {
-            throw new Exception("La date de rendez-vous doit être dans le futur.");
-        }
+     
+        else {
+        	
        
+        sendsms("+21629966022","votre appointement est le "+ appointment.getDate());
             return appointmentRepository.save(appointment);
-
+        }
     }
     
     
-	public void sendsms(String str) {
-		Twilio.init("AC21a628a07a8990db4db08f1a67124b63", "3f17a1f426271c8d3c7879dde177530a");
+	public void sendsms(String str,String messagesms) {
+		Twilio.init("AC8f7c763c17c52a3092a54ce299689286", "7c818c750cf5872c1f35adde03fc854f");
 		try {
 			com.twilio.rest.api.v2010.account.Message message = com.twilio.rest.api.v2010.account.Message
 					.creator(new PhoneNumber(str), // To number
-							new PhoneNumber("+15674093706"), // From number
-							"votre réclamation a été traité")
+							new PhoneNumber("+15674092533"), // From number
+							messagesms)
 					.create();
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -102,8 +105,8 @@ public class AppointmentService implements IAppointmentService {
         //     a.getUsers().add(u);
         a.setAnnouncementApp(a.getAnnouncementApp());
         // Enregistrer l'entité mise à jour dans la base de données
-        return appointmentRepository.save(a);
 
+        return appointmentRepository.save(a);
 
 
 
@@ -124,6 +127,24 @@ public class AppointmentService implements IAppointmentService {
         return appointmentRepository.findAppointmentsByUsersAndDate(user1, user2, start, end);
     }*/
 
+    @Scheduled(fixedRate = 100000)
+    public void RappelerSurRendezVous() {
+    List<Appointment> listapp = appointmentRepository.findAll();
+    		Date currentSqlDate = new Date(System.currentTimeMillis());
+    int a = currentSqlDate.getDate() -1;
+    		for (Appointment u : listapp) {    					
+    				
+    			if(u.getAppointmentDate().getYear()==currentSqlDate.getYear()&&
+    					u.getAppointmentDate().getMonth()==currentSqlDate.getMonth()&&
+    					u.getAppointmentDate().getDay()== u.getDate().getDay()
+    					) {
+    				sendsms("+21629966022", "il reste un jour pour rendez vous le "+u.getDate());
+    				System.out.println("c bon");
+    			}
+    		}
+    	
+    }
+    
     @Override
     public List<Date> getAvailableDatesFinal(Long userId,Long userId2) {
           	User user1 = userRepo.findById(userId).orElse(null);
@@ -364,5 +385,9 @@ public class AppointmentService implements IAppointmentService {
 
         appointment.setAnnouncementApp(a);*/
 
+    
+
+    	
+    
 
 }
