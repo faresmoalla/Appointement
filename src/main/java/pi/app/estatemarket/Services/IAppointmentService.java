@@ -22,7 +22,7 @@ public interface IAppointmentService {
 
     //List<Appointment> findAppointmentsByUsersAndDate(User user1, User user2, Date start, Date end);
 
-    List<Date> getAvailableDates(Long userId);
+    List<Date> getAvailableDatesFinal(Long userId,Long userId2);
 
     List<Appointment> getAvailableAppointments(User user1, User user2, Date start, Date end);
 

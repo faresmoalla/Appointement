@@ -1,6 +1,8 @@
 package pi.app.estatemarket.Services;
 
 import lombok.AllArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.twilio.Twilio;
@@ -24,9 +26,16 @@ public class AppointmentService implements IAppointmentService {
     UserRepository userRepository ;
     AnnouncementRepository announcementRepository;
 
+    @Autowired
+    UserRepository userRepo;
+    
+    
     @Override
     public Appointment addAppointment(Appointment appointment) throws Exception {
-        // Vérifier si la date de rendez-vous est bien renseignée
+      
+    	List<User> listusers = userRepo.findAll();
+    	
+    	// Vérifier si la date de rendez-vous est bien renseignée
         if (appointment.getDate() == null) {
             throw new Exception("La date de rendez-vous est obligatoire.");
         }
@@ -36,14 +45,11 @@ public class AppointmentService implements IAppointmentService {
             throw new Exception("La date de rendez-vous doit être dans le futur.");
         }
        
-        else {
-            //sendsms("votre rendez vous est passé avec succées le "+appointment.getDate());
             return appointmentRepository.save(appointment);
 
-        }
-        
-        
     }
+    
+    
 	public void sendsms(String str) {
 		Twilio.init("AC21a628a07a8990db4db08f1a67124b63", "3f17a1f426271c8d3c7879dde177530a");
 		try {
@@ -119,33 +125,79 @@ public class AppointmentService implements IAppointmentService {
     }*/
 
     @Override
-    public List<Date> getAvailableDates(Long userId) {
-        List<Appointment> userAppointments = appointmentRepository.findByUsers_userID(userId);
-        List<Date> allDates = new ArrayList<>();
-        Calendar cal = Calendar.getInstance();
-        for (Appointment appointment : userAppointments) {
-            cal.setTime(appointment.getDate());
-            allDates.add(cal.getTime());
-        }
+    public List<Date> getAvailableDatesFinal(Long userId,Long userId2) {
+          	User user1 = userRepo.findById(userId).orElse(null);
+          	User user2 = userRepo.findById(userId2).orElse(null);
+          	
+          	List<Appointment> listap1=new ArrayList<>() ;
+          	List<Appointment> listap2 =new ArrayList<>() ;
 
-        Set<Date> availableDates = new HashSet<>();
-        for (int i = 0; i < 7; i++) {
-            cal.setTime(new Date());
-           cal.add(Calendar.DATE, i);
-           // System.out.println(cal.getTime());
-            for(Date d : allDates) {
-                System.out.println(cal.getTime().getDay());
-                System.out.println(d.getDay());
-                if (d.getDay() != cal.getTime().getDay()) {
-                    availableDates.add(cal.getTime());
-                }
-            }
-        }
-
-
-        List<Date> sortedAvailableDates = new ArrayList<>(availableDates);
-        Collections.sort(sortedAvailableDates);
-        return sortedAvailableDates;
+      for(Appointment ap1 : user1.getAppointments()) {
+    	  if(ap1.isAppointmentStatus()) {
+    		  listap1.add(ap1);  
+    		  System.out.println(ap1.getDate());
+    	  }
+    	  
+      }
+    	
+      for(Appointment ap2 : user2.getAppointments()) {
+    	  if(ap2.isAppointmentStatus()) {
+    		  listap2.add(ap2);  
+    		  System.out.println(ap2.getDate());
+    	  }
+      }
+     
+      List<Date> availableDates = new ArrayList<>();
+      for (Appointment aa1 : listap1) {
+          for (Appointment aa2 : listap2) {
+          if(aa1.getAppointmentDate().getYear()==aa2.getAppointmentDate().getYear() &&aa1.getAppointmentDate().getMonth()==aa2.getAppointmentDate().getMonth()&&
+        		  aa1.getAppointmentDate().getDay()==aa2.getAppointmentDate().getDay())
+        		   {
+        	  availableDates.add(aa1.getDate());
+        	  
+        	  
+          }
+          }
+      }
+    		
+    	
+    	return availableDates;
+    
+    	
+//      
+//  	List<Date> allDates = new ArrayList<>();
+//      
+//  	Calendar cal = Calendar.getInstance();
+//      for (Appointment appointment : userAppointments) {
+//         if(appointment.isAppointmentStatus()) {
+//      	   
+//         
+//      	
+//      	cal.setTime(appointment.getDate());
+//          allDates.add(cal.getTime());}
+//      }
+//
+//      Set<Date> availableDates = new HashSet<>();
+//      for (int i = 0; i < 7; i++) {
+//          cal.setTime(new Date());
+//         cal.add(Calendar.DATE, i);
+//         // System.out.println(cal.getTime());
+//          for(Date d : allDates) {
+//              System.out.println(cal.getTime().getDay());
+//              System.out.println(d.getDay());
+//              if (d.getDay() != cal.getTime().getDay()) {
+//                  
+//              	availableDates.add(cal.getTime());
+//             
+//              
+//              }
+//              
+//          }
+//      }
+//
+//
+//      List<Date> sortedAvailableDates = new ArrayList<>(availableDates);
+//      Collections.sort(sortedAvailableDates);
     }
 
    /* @Override
@@ -172,7 +224,7 @@ public class AppointmentService implements IAppointmentService {
 
 
 
-
+    
     @Override
     public  List<Appointment> getAvailablesDates(long user1, long user2) {
         List<Appointment> user1Appointments = appointmentRepository.findByUsers_userID(user1);
@@ -188,7 +240,7 @@ public class AppointmentService implements IAppointmentService {
         }
 
         for(Appointment app22 : user2Appointments) {
-            System.out.println(app22.isAppointmentStatus());
+           // System.out.println(app22.isAppointmentStatus());
             if(!app22.isAppointmentStatus()){
                 user2AppointmentsAv.add(app22);
             }
