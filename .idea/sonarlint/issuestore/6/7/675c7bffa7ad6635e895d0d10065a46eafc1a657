@@ -1,0 +1,6 @@
+
+t	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(Ïµ÷ôüÿÿÿÿ
+l	java:S116"WRename this field "IdSponsoring" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ä²ÉŞ
+s	java:S116"YRename this field "SponsoringType" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(‡ÛÈ«úÿÿÿÿ
+f	java:S116"QRename this field "PriceS" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Äß§è
+l	java:S116"WRename this field "DescriptionS" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(²¹Ô
